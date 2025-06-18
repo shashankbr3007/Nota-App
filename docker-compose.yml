@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  frontend:
+    build:
+      context: ./nota-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend
+    networks:
+      - nota-net
+
+  backend:
+    build:
+      context: ./nota-backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/notes_db
+    depends_on:
+      - postgres
+    networks:
+      - nota-net
+
+  postgres:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: notes_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - nota-net
+
+volumes:
+  pgdata:
+
+networks:
+  nota-net:
